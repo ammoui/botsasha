@@ -1,6 +1,4 @@
 import os
-print("DATABASE_URL =", os.getenv("DATABASE_URL"))
-print("BOT_TOKEN =", os.getenv("BOT_TOKEN"))
 import asyncio
 import hashlib
 from aiogram import Bot, Dispatcher, types
