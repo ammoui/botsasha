@@ -86,24 +86,25 @@ async def search_photos(text: str, limit: int = 50):
     if using_postgres:
         async with pg_pool.acquire() as conn:
             rows = await conn.fetch("""
-                SELECT file_id, caption FROM photos
+                SELECT message_id, file_id, caption FROM photos
                 WHERE LOWER(caption) LIKE $1 OR LOWER(tags) LIKE $2
                 ORDER BY message_id DESC
                 LIMIT $3
             """, like, like, limit)
             for r in rows:
-                results.append((r['file_id'], r['caption']))
+                results.append((r['file_id'], r['caption'], r['message_id']))
     else:
         async with aiosqlite.connect(DB_FILE) as db:
             async with db.execute("""
-                SELECT file_id, caption FROM photos
+                SELECT message_id, file_id, caption FROM photos
                 WHERE LOWER(caption) LIKE ? OR LOWER(tags) LIKE ?
                 ORDER BY message_id DESC
                 LIMIT ?
             """, (like, like, limit)) as cursor:
-                async for file_id, caption in cursor:
-                    results.append((file_id, caption))
+                async for message_id, file_id, caption in cursor:
+                    results.append((file_id, caption, message_id))
     return results
+
 
 
 @dp.channel_post()
@@ -126,19 +127,20 @@ async def inline_search(query: types.InlineQuery):
             return
 
         results = []
+        # Получаем из БД file_id, caption и message_id
         rows = await search_photos(text, limit=50)
-        for file_id, caption in rows:
-            result_id = hashlib.md5(file_id.encode()).hexdigest()
+        for file_id, caption, message_id in rows:
+            # Уникальный ID для каждого результата
+            result_id = f"{message_id}"  # гарантированно уникально
             results.append(InlineQueryResultCachedPhoto(
                 id=result_id,
                 photo_file_id=file_id,
-                # title/caption optional
+                caption=caption  # Telegram показывает подпись
             ))
 
         await query.answer(results=results, cache_time=10)
     except Exception as e:
         print("Ошибка при обработке inline_query:", e)
-
 
 async def main():
     await init_db()
