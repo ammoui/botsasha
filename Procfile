@@ -1,2 +1,2 @@
-worker: python kartinke.py
+web: python kartinke.py
 
