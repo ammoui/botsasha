@@ -112,7 +112,7 @@ async def new_channel_post(message: types.Message):
         file_id = message.photo[-1].file_id
         caption = message.caption or ""
         tags = " ".join([w[1:] for w in caption.split() if w.startswith("#")])
-        created_at = message.date  # <- исправлено
+        created_at = message.date  # <- исправлено: объект datetime
         await save_photo(message.message_id, file_id, caption, tags, created_at)
         print(f"Добавлено сообщение {message.message_id}: {caption}")
 
