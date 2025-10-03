@@ -112,10 +112,9 @@ async def new_channel_post(message: types.Message):
         file_id = message.photo[-1].file_id
         caption = message.caption or ""
         tags = " ".join([w[1:] for w in caption.split() if w.startswith("#")])
-        created_at = message.date.isoformat()
+        created_at = message.date  # <- исправлено
         await save_photo(message.message_id, file_id, caption, tags, created_at)
         print(f"Добавлено сообщение {message.message_id}: {caption}")
-
 
 @dp.inline_query()
 async def inline_search(query: types.InlineQuery):
