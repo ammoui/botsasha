@@ -77,8 +77,7 @@ async def handle_inline(query: types.InlineQuery):
     results = [
         InlineQueryResultCachedPhoto(
             id=str(message_id),
-            photo_file_id=file_id,
-            caption=caption
+            photo_file_id=file_id
         ) for file_id, caption, message_id in rows
     ]
     await query.answer(results=results, cache_time=10)
